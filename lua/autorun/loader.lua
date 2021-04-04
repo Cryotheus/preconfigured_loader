@@ -112,8 +112,6 @@ local function load_scripts(command_reload)
 	MsgC(color_significant, "\nConstructed load order.\n\nLoading scripts by load order...\n")
 	load_by_order()
 	MsgC(color_significant, "\nLoaded scripts.\n\n", color_generic, "/// ", color_significant, "All scripts loaded.", color_generic, " \\\\\\\n\n")
-	
-	hook.Call("PecanLoaded", PECAN, command_reload)
 end
 
 --concommands
