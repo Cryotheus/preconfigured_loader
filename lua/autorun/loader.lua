@@ -107,7 +107,7 @@ local function load_by_order()
 end
 
 local function load_scripts(command_reload)
-	MsgC(color_generic, "\n\\\\\\ ", color_significant, branding, color_generic, " ///\n\nConstructing load order...\n")
+	MsgC(color_generic, "\n\\\\\\ ", color_significant, branding, color_generic, " ///\n\n", color_significant, "Constructing load order...\n")
 	construct_order(config, 1, "")
 	MsgC(color_significant, "\nConstructed load order.\n\nLoading scripts by load order...\n")
 	load_by_order()
