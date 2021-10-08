@@ -43,6 +43,10 @@ local max_depth = 4
 --reload command
 local reload_command = "loader_reload"
 
+--should the file self-include for command reloads instead of loading with the source's path as a prefix
+--instead of true, you can put a string for the include function to use
+local self_include_reload = true
+
 --colors
 local color_generic = Color(255, 255, 255)
 local color_significant = Color(0, 255, 0)
@@ -87,7 +91,7 @@ local function construct_order(config_table, depth, path)
 	end
 end
 
-local function load_by_order()
+local function load_by_order(prefix_directory)
 	for priority = 0, highest_priority do
 		local script_paths = load_order[priority]
 		
@@ -100,7 +104,7 @@ local function load_by_order()
 				
 				MsgC(color_generic, " ]    0d" .. bits .. "	" .. script_path_extension .. "\n")
 				
-				for bit_flag, func in pairs(load_functions) do if fl_bit_band(bits, bit_flag) > 0 then func(script_path_extension) end end
+				for bit_flag, func in pairs(load_functions) do if fl_bit_band(bits, bit_flag) > 0 then func(prefix_directory .. script_path_extension) end end
 			end
 		else MsgC(color_significant, "Skipping level " .. priority .. " as it contains no scripts.\n") end
 	end
@@ -110,17 +114,28 @@ local function load_scripts(command_reload)
 	MsgC(color_generic, "\n\\\\\\ ", color_significant, branding, color_generic, " ///\n\n", color_significant, "Constructing load order...\n")
 	construct_order(config, 1, "")
 	MsgC(color_significant, "\nConstructed load order.\n\nLoading scripts by load order...\n")
-	load_by_order()
+	
+	if command_reload then
+		local full_path = debug.getinfo(1, "S").short_src
+		
+		MsgC(color_generic, "\n!!! ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " !!!\nAs the load was requested using command, the source file for the loader be used as a prefix for the following includes. You may experience issues with scripts loaded using this command that do not persist when the file is loaded by an include. If that happens, try making the file include itself instead of executing the load_scripts function in the reload command. You can do this by setting self_include_reload to true (attempts to automatically grab the file's path) or the full path of the loader.\n||| ", color_significant, "PRECONFIGURED LOADER NOTE", color_generic, " |||\n\n")
+		load_by_order(string.GetPathFromFilename(string.sub(full_path, select(2, string.find(full_path, "lua/", 1, true)) + 1)))
+	else load_by_order("") end
+	
 	MsgC(color_significant, "\nLoaded scripts.\n\n", color_generic, "/// ", color_significant, "All scripts loaded.", color_generic, " \\\\\\\n\n")
 end
 
 --concommands
 concommand.Add(reload_command, function(ply)
-	--is it possible to run a command from client and execute the serverside command when the command is shared?
-	if not IsValid(ply) or ply:IsSuperAdmin() or IsValid(LocalPlayer()) and ply == LocalPlayer() then
-		--put what you need before reloading here
-		load_scripts(true)
-		--put what you need after reloading here
+	if CLIENT or not IsValid(ply) or ply:IsSuperAdmin() then
+		if self_include_reload then
+			if isstring(self_include_reload) then include(self_include_reload)
+			else
+				local full_path = debug.getinfo(1, "S").short_src
+				
+				include(string.sub(full_path, select(2, string.find(full_path, "lua/", 1, true)) + 1))
+			end
+		else load_scripts(true) end
 	end
 end, nil, "Reload all " .. branding .. " scripts.")
 
