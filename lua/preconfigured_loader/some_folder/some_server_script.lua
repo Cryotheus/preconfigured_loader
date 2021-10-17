@@ -1,0 +1,1 @@
+print("Loaded " .. string.GetFileFromFilename(debug.getinfo(1, "S").short_src))
