@@ -87,6 +87,14 @@ local color_significant = Color(0, 255, 0)
 	local loader_path = string.sub(loader_full_source, (select(2, string.find(loader_full_source, "lua/", 1, true)) or 0) + 1)
 	local loader_directory = string.GetPathFromFilename(loader_path)
 	local map = game.GetMap()
+	
+	--if we are in a gamemode environment, remove bad prefixing!
+	if GM then
+		--local prefix_start, prefix_end = string.find(loader_directory, "addons/.-/gamemodes/")
+		local prefix_start, prefix_end = string.find(loader_directory, ".-/gamemodes/")
+		
+		if prefix_start then loader_directory = string.sub(loader_directory, prefix_end + 1) end
+	end
 
 --local functions
 local function construct_order(config_table, depth, path)
