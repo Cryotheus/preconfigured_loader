@@ -84,7 +84,7 @@ local color_significant = Color(0, 255, 0)
 	--directory stuff
 	loader_extension_path = loader_extension_path == true and "extensions/" or loader_extension_path .. "/"
 	local loader_full_source = debug.getinfo(1, "S").short_src
-	local loader_path = string.sub(loader_full_source, select(2, string.find(loader_full_source, "lua/", 1, true)) + 1)
+	local loader_path = string.sub(loader_full_source, (select(2, string.find(loader_full_source, "lua/", 1, true)) or 0) + 1)
 	local loader_directory = string.GetPathFromFilename(loader_path)
 	local map = game.GetMap()
 
